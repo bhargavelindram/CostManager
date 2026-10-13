@@ -1,0 +1,34 @@
+name: Create CostManager GitHub Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create initial release if it does not exist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          TARGET_SHA: ${{ github.sha }}
+        run: |
+          if gh release view v0.1.0 --repo "$REPO" >/dev/null 2>&1; then
+            echo "Release v0.1.0 already exists; leaving it unchanged."
+          else
+            cat > release-notes.md <<'NOTES'
+          # CostManager v0.1.0 — Unified Business Suite
+
+          First prototype release of CostManager, a unified business-management interface.
+
+          Includes the dashboard, meeting cost meter, people directory, meetings, team chat, events, company statistics, investor records, access and roles, tasks and projects, finance and expenses, attendance and leave, documents, procurement and assets, customers and sales, support desk, and approvals/audit tools.
+
+          **Prototype limitations:** data is stored locally in the browser. Authentication providers, secure shared database, server-enforced permissions, real-time cross-device chat/calls, and production financial integrations are not configured. Use demo data only.
+          NOTES
+            gh release create v0.1.0 --repo "$REPO" --target "$TARGET_SHA" --title "CostManager v0.1.0 — Unified Business Suite" --notes-file release-notes.md
+          fi
